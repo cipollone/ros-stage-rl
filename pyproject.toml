@@ -10,6 +10,8 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
+numpy = "^1.19.4"
+gym = "^0.17.3"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.19.0"
