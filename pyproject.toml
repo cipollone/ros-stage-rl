@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "ros-stage-rl"
+name = "rosstagerl"
 version = "0.1.0"
 description = "RL experiments on a running instance of ROS Stage"
 authors = ["Roberto Cipollone <cipollone.rt@gmail.com>"]
 license = "GPL-3.0-or-later"
+exclude = [
+	"docker/*", ".vimrc",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
