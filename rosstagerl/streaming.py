@@ -128,10 +128,11 @@ class Receiver:
         """
 
         self.MSG_LENGTH = msg_length
+        self.ip = ip
+        self.port = port
 
         # Create connection
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((ip, port))
 
         # Received data
         self._data_queue = queue.Queue(self.QUEUE_SIZE if wait else 0)
@@ -139,6 +140,10 @@ class Receiver:
     def start(self):
         """Start receiving messages to a queue."""
 
+        # Connect
+        self.sock.connect((self.ip, self.port))
+
+        # Start receiving
         thread = threading.Thread(target=self._always_receive)
         thread.daemon = True
         thread.start()
