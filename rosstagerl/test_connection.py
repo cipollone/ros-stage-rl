@@ -7,14 +7,13 @@ import numpy as np
 
 from .streaming import Sender, Receiver
 
-# TODO: verify that actions and states are correctly exchanged
 # TODO: delete this file
 
 # Communication protocol
 actions_port = 30005
 states_port = 30006
 state_msg_len = 20    # a numpy vector of 5 float32
-action_msg_len = 4    # a numpy scalar of type int32
+action_msg_len = 4    # a positive numpy scalar of type int32
 
 
 
@@ -29,7 +28,7 @@ def test():
     # Start server and client
     #   NOTE: make sure that the couple is started also on the other side
     action_sender.start()
-    input("Serving actions on " + str(action_sender.server.server_address))
+    input("> Serving actions on " + str(action_sender.server.server_address))
     state_receiver.start()
 
     # Test loop: the agent (you) chooses an action
