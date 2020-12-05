@@ -3,6 +3,8 @@
 This file will be deleted.
 """
 
+import numpy as np
+
 from .streaming import Sender, Receiver
 
 # TODO: verify that actions and states are correctly exchanged
@@ -12,7 +14,7 @@ from .streaming import Sender, Receiver
 actions_port = 30005
 states_port = 30006
 state_msg_len = 20    # a numpy vector of 5 float32
-action_msg_len = 1    # a numpy scalar of type uint8
+action_msg_len = 4    # a numpy scalar of type int32
 
 
 
@@ -30,5 +32,26 @@ def test():
     input("Serving actions on " + str(action_sender.server.server_address))
     state_receiver.start()
 
-    input()
+    # Test loop: the agent (you) chooses an action
+    while True:
+        action = int(input("Next action "))
+        action_sender.send(_action2binary(action))
+        state = _binary2state(state_receiver.receive(wait=True))
+        print("State", state)
+
     print("done")
+
+
+def _action2binary(action):
+    """Converts a action to a byte."""
+
+    buff = np.array(action, dtype=np.int32).tobytes()
+    assert len(buff) == action_msg_len
+    return buff
+
+def _binary2state(buff):
+    """Converts bytes to a state vector."""
+
+    assert len(buff) == state_msg_len
+    array = np.frombuffer(buff, dtype=np.float32)
+    return array
