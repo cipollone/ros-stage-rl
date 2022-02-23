@@ -11,7 +11,7 @@ from .envs import RosControlsEnv
 def test():
 
     # Instantiate
-    ros_env = RosControlsEnv(5, 4)
+    ros_env = RosControlsEnv(n_actions=5, n_observations=5)
 
     ros_env.reset()
 

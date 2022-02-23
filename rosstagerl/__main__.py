@@ -8,7 +8,7 @@ from . import test_connection
 def main():
     """Main function."""
 
-    # Just testing for now
+    # Just testing. Use the environment class for a real use.
     test_connection.test()
 
 

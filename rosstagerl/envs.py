@@ -9,11 +9,9 @@ from .streaming import Sender, Receiver
 class RosControlsEnv(gym.Env):
     """Gym environment that controls ROS.
 
-    Actions performed on this environment are forwarded to a running ROS
-    instance and the states are those returned from the robot.
-    This environment communicates with a running instance of
-    https://github.com/iocchi/StageROSGym. See that repo to setup also the
-    other side.
+    Actions performed on this environment are forwarded to a running
+    instange of https://github.com/cipollone/stage-controls.
+    See that repo to set up also the other sitde of the communication.
     """
     
     # NOTE: many settings depend on the communication protocol.
@@ -28,7 +26,7 @@ class RosControlsEnv(gym.Env):
     # Communication protocol
     actions_port = 30005
     states_port = 30006
-    state_msg_len = 16    # a numpy vector of 4 float32
+    state_msg_len = 0     # a numpy vector of float32 (set in main)
     action_msg_len = 4    # a positive numpy scalar of type int32
 
     class StateReceiver(Receiver):
@@ -66,7 +64,6 @@ class RosControlsEnv(gym.Env):
             # Send
             Sender.send(self, buff)
 
-
     def __init__(self, n_actions: int, n_observations: int):
         """Initialize.
 
@@ -74,11 +71,11 @@ class RosControlsEnv(gym.Env):
             remote ROS Controller.
         :param n_observations: number of observations in state vector.
         """
-
         # Define spaces
         self.action_space = gym.spaces.Discrete(n_actions)
         self.observation_space = gym.spaces.Box(
             low=float("-inf"), high=float("inf"), shape=[n_observations], dtype=np.float32)
+        RosControlsEnv.state_msg_len  = n_observations * 4
         assert self.state_msg_len == n_observations * 4, (
             f"Expected a msg length of {n_observations * 4}, got {self.state_msg_len}")
 
