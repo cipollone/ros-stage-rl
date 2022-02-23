@@ -11,7 +11,7 @@ from .envs import RosControlsEnv
 def test():
 
     # Instantiate
-    ros_env = RosControlsEnv(5)   # Five actions on iocchi/StageROSGym@1bda032
+    ros_env = RosControlsEnv(5, 4)
 
     ros_env.reset()
 

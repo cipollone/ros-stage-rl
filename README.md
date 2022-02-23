@@ -1,8 +1,6 @@
 # Ros-stage-rl
 
-This project is used to run RL experiments on a running instance of [StageROSGym](https://github.com/iocchi/StageROSGym).
-
-Development package.
+This project is used to run RL experiments on a running instance of [stage-controls](https://github.com/cipollone/stage-controls).
 
 ## Install and use
 
@@ -22,3 +20,9 @@ To use this package, simply run:
 
     python3 -m rosstagerl              # if installed
     poetry run python3 -m rosstagerl   # if under development
+	
+
+NOTE: together with stage-controls, this package defines a communication protocol for observations and actions.
+Both spaces need to match between the two packages' versions, otherwise communication won't take place as expected.
+In particular, actions are in a discrete set, sent as int32 indexes, starting from 0, and observations are a numpy array of float32.
+The two versions must agree on the number of actions and observations.

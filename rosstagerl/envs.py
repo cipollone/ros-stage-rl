@@ -28,9 +28,8 @@ class RosControlsEnv(gym.Env):
     # Communication protocol
     actions_port = 30005
     states_port = 30006
-    state_msg_len = 20    # a numpy vector of 5 float32
+    state_msg_len = 16    # a numpy vector of 4 float32
     action_msg_len = 4    # a positive numpy scalar of type int32
-
 
     class StateReceiver(Receiver):
         """Just a wrapper that deserializes state vectors."""
@@ -40,15 +39,15 @@ class RosControlsEnv(gym.Env):
 
             :return: a numpy vector of the most recent state.
             """
-
             # Receive
             buff = Receiver.receive(self, wait=True)
 
             # Deserialize
-            assert len(buff) == RosControlsEnv.state_msg_len
+            assert len(buff) == RosControlsEnv.state_msg_len, (
+                "Expected msg len {}, got {}".format(
+                    RosControlsEnv.state_msg_len, len(buff)))
             array = np.frombuffer(buff, dtype=np.float32)
             return array
-
 
     class ActionSender(Sender):
         """Just a wrapper that serializes actions."""
@@ -58,27 +57,30 @@ class RosControlsEnv(gym.Env):
 
             :param action: a scalar action or signal.
             """
-
             # Serialize
             buff = np.array(action, dtype=np.int32).tobytes()
-            assert len(buff) == RosControlsEnv.action_msg_len
+            assert len(buff) == RosControlsEnv.action_msg_len, (
+                "Expected msg len {}, got {}".format(
+                    RosControlsEnv.action_msg_len, len(buff)))
 
             # Send
             Sender.send(self, buff)
 
 
-    def __init__(self, n_actions):
+    def __init__(self, n_actions: int, n_observations: int):
         """Initialize.
 
         :param n_actions: the number of action allowed from the 
             remote ROS Controller.
+        :param n_observations: number of observations in state vector.
         """
 
         # Define spaces
         self.action_space = gym.spaces.Discrete(n_actions)
         self.observation_space = gym.spaces.Box(
-            low=float("-inf"), high=float("inf"), shape=[5], dtype=np.float32)
-            # NOTE: Actually the third is an angle
+            low=float("-inf"), high=float("inf"), shape=[n_observations], dtype=np.float32)
+        assert self.state_msg_len == n_observations * 4, (
+            f"Expected a msg length of {n_observations * 4}, got {self.state_msg_len}")
 
         # Initialize connections
         self.action_sender = RosControlsEnv.ActionSender(
