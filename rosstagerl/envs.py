@@ -113,7 +113,7 @@ class RosControlsEnv(gym.Env):
         # Read observation
         observation = self.state_receiver.receive()
 
-        return (observation, 0.0, False, {})
+        return observation
 
     def step(self, action):
         """Run one timestep of the environment's dynamics.
