@@ -74,7 +74,7 @@ class RosControlsEnv(gym.Env):
         # Define spaces
         self.action_space = gym.spaces.Discrete(n_actions)
         self.observation_space = gym.spaces.Box(
-            low=float("-inf"), high=float("inf"), shape=[n_observations], dtype=np.float32)
+            low=float("-inf"), high=float("inf"), shape=[n_observations + 1], dtype=np.float32)
         RosControlsEnv.state_msg_len  = n_observations * 4
         assert self.state_msg_len == n_observations * 4, (
             f"Expected a msg length of {n_observations * 4}, got {self.state_msg_len}")
@@ -91,20 +91,19 @@ class RosControlsEnv(gym.Env):
         # Connect now
         self.action_sender.start()
         print("> Serving actions on", self.action_sender.server.server_address)
-        print("> Connecting to ", self.state_receiver.ip, ":",
+        print(
+            "> Connecting to ", self.state_receiver.ip, ":",
             self.state_receiver.port, " for states. (pause)",
             sep="", end=" ",
         )
         input()
         self.state_receiver.start()
 
-
     def reset(self):
         """Reset the environment to the initial state.
 
         :return: The initial observation.
         """
-
         # Send signal
         self.action_sender.send(
             self._signals["reset"]
@@ -114,6 +113,19 @@ class RosControlsEnv(gym.Env):
         observation = self.state_receiver.receive()
 
         return observation
+
+    def _process_obs(self, observation):
+        """Post processing.
+
+        Assuming an observation is [x, y, th, vel, ang_vel]
+        """
+        # NOTE: n_observations + 1 in __init__ because of this
+        assert len(observation) == self.observation_space - 1
+        return (
+            observation[:2] +
+            [np.cos(observation[2]), np.sin(observation[2])] +
+            observation[:3]
+        )
 
     def step(self, action):
         """Run one timestep of the environment's dynamics.
@@ -125,7 +137,6 @@ class RosControlsEnv(gym.Env):
             done (bool): whether the episode has ended
             info (dict): other infos
         """
-
         # Check
         if not 0 <= action < self.action_space.n:
             raise RuntimeError(str(action) + " is not an action.")
@@ -136,7 +147,9 @@ class RosControlsEnv(gym.Env):
         # Read observation
         observation = self.state_receiver.receive()
 
+        # Processing
+        observation = self._process_obs(observation)
+
         # TODO: compute reward and done according to a criterion implemented
         #   in some external class
         return (observation, 0.0, False, {})
-
