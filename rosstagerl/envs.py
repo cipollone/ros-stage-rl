@@ -112,6 +112,9 @@ class RosControlsEnv(gym.Env):
         # Read observation
         observation = self.state_receiver.receive()
 
+        # Postprocess
+        observation = self._process_obs(observation)
+
         return observation
 
     def _process_obs(self, observation):
@@ -120,12 +123,13 @@ class RosControlsEnv(gym.Env):
         Assuming an observation is [x, y, th, vel, ang_vel]
         """
         # NOTE: n_observations + 1 in __init__ because of this
-        assert len(observation) == self.observation_space - 1
-        return (
-            observation[:2] +
-            [np.cos(observation[2]), np.sin(observation[2])] +
-            observation[:3]
-        )
+        assert len(observation) == self.observation_space.shape[0] - 1
+        obs = np.concatenate((
+            observation[:2],
+            [np.cos(observation[2]), np.sin(observation[2])],
+            observation[3:],
+        ))
+        return obs
 
     def step(self, action):
         """Run one timestep of the environment's dynamics.
